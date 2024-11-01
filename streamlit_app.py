@@ -13,7 +13,7 @@ import contextlib
 st.write(f"TensorFlow version: {tf.__version__}")
 # Descargar y descomprimir el modelo si no existe
 def download_and_extract_model():
-    model_url = 'https://dl.dropboxusercontent.com/s/4swm8f0ljha4m1ys743kb/best_model.zip?rlkey=5heqtz9pnzcjgj13lndb3x3x8&st=yld8tmhb'
+    model_url = 'https://drive.google.com/file/d/1-6WQc3pji8z1PiwuAL6S4GjiOkWALZLG/view?usp=drive_link'
     zip_path = 'best_model.zip'
     extract_folder = 'extracted_files'
 
@@ -41,7 +41,7 @@ modelo_path = download_and_extract_model()
 if not modelo_path or not os.path.exists(modelo_path):
     st.error("No se encontró el archivo del modelo")
 else:
-    st.success("Archivo del modelo encontrado")
+    st.success("Archivo del modelo encontradoDDDD")
 
 # Definir el modelo base InceptionV3
 base_model = InceptionV3(weights=None, include_top=False, input_shape=(150, 150, 3))
@@ -81,6 +81,6 @@ if uploaded_file is not None and model is not None:
 
     # Mostrar resultados
     if prediction[0][0] > 0.5:
-        st.success('El modelo predice que la imagen es de un **Perro**.')
+        st.success('El modelo predice que la imagen es de un **NORMAL**.')
     else:
-        st.success('El modelo predice que la imagen es de un **Gato**.')
+        st.success('El modelo predice que la imagen es de un **PNEUMONIA**.')
