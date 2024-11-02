@@ -67,10 +67,10 @@ uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "jpeg", "pn
 
 if uploaded_file is not None and model is not None:
     # Mostrar la imagen subida
-    st.image(uploaded_file, caption="Imagen cargada")
+    st.image(uploaded_file, width=300, caption="Imagen cargada")
 
     # Preprocesamiento de la imagen para hacer la predicción
-    img = image.load_img(uploaded_file, target_size=(155, 155))
+    img = image.load_img(uploaded_file, target_size=(150, 150))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 

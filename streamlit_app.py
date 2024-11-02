@@ -68,7 +68,7 @@ uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "jpeg", "pn
 
 if uploaded_file is not None:
     # Mostrar la imagen subida
-    st.image(uploaded_file, width=IMG_SIZE[0], caption="Imagen cargada")
+    st.image(uploaded_file, caption="Imagen cargada")
 
     # Preprocesamiento de la imagen para hacer la predicción
     img = image.load_img(uploaded_file, target_size=IMG_SIZE)
@@ -84,4 +84,4 @@ if uploaded_file is not None:
     else:
         st.error('El modelo predice que la imagen es de un **PNEUMONIA**.')
 
-    f"Confianza de la predicción: {prediction[0][0]:.4f}"
+    f"Confianza de la preadicción: {prediction[0][0]:.4f}"
