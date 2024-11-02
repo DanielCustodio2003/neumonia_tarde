@@ -84,4 +84,4 @@ if uploaded_file is not None:
     else:
         st.error('El modelo predice que la imagen es de un **PNEUMONIA**.')
 
-    f"Confianza de la preadicción: {prediction[0][0]:.4f}"
+    # f"Confianza de la preadicción: {prediction[0][0]:.4f}"
