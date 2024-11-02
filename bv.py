@@ -8,14 +8,13 @@ import numpy as np
 import wget
 import zipfile
 import os
+import contextlib
+import sys
 
-# Tamaño de entrada de las imágenes
-IMG_SIZE = (155, 155)
-
-# Función para descargar y descomprimir el modelo
+# Descargar y descomprimir el modelo si no existe
 def download_and_extract_model():
-    model_url = 'https://www.dropbox.com/scl/fi/jp75n9yjaa9iggs760vvv/inception_v3_final_model.zip?rlkey=59psydhgwi97afwqa4rspxdrd&dl=1'
-    zip_path = 'inception_v3_final_model.zip'
+    model_url = 'https://dl.dropboxusercontent.com/s/4swm8f0ljha4m1ys743kb/best_model.zip?rlkey=5heqtz9pnzcjgj13lndb3x3x8&st=yld8tmhb'
+    zip_path = 'best_model.zip'
     extract_folder = 'extracted_files'
 
     # Descargar el archivo zip si no existe
@@ -25,7 +24,7 @@ def download_and_extract_model():
             st.success("Modelo descargado correctamente.")
         except Exception as e:
             st.error(f"Error al descargar el modelo: {e}")
-            return None
+            return False
 
     # Descomprimir el archivo
     if not os.path.exists(extract_folder):
@@ -34,21 +33,21 @@ def download_and_extract_model():
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_folder)
     
-    return os.path.join(extract_folder, 'inception_v3_final_model.keras')
+    return os.path.join(extract_folder, 'best_model_local.keras')
 
 modelo_path = download_and_extract_model()
 
 # Verificar si el archivo del modelo existe
 if not modelo_path or not os.path.exists(modelo_path):
-    st.error("No se encontró el archivo del modelo.")
+    st.error("No se encontró el archivo del modelo")
 else:
-    st.success("Archivo del modelo encontrado.")
+    st.success("Archivo del modelo encontrado")
 
-# Definir el modelo base InceptionV3 sin la capa de clasificación superior
-base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=IMG_SIZE + (3,))
+# Definir el modelo base InceptionV3
+base_model = InceptionV3(weights=None, include_top=False, input_shape=(150, 150, 3))
 base_model.trainable = False
 
-# Añadir capas de clasificación personalizadas
+# Añadir capas de clasificación
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
 x = Dense(1024, activation='relu')(x)
@@ -58,7 +57,7 @@ model = Model(inputs=base_model.input, outputs=predictions)
 
 # Cargar los pesos del modelo desde el archivo .keras
 try:
-    model.load_weights(modelo_path, skip_mismatch=True)
+    model.load_weights(modelo_path)
     st.success("Pesos del modelo cargados correctamente.")
 except Exception as e:
     st.error(f"Error al cargar los pesos del modelo: {e}")
@@ -66,22 +65,22 @@ except Exception as e:
 # Verificación de carga de archivo
 uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "jpeg", "png"], label_visibility="hidden")
 
-if uploaded_file is not None:
+if uploaded_file is not None and model is not None:
     # Mostrar la imagen subida
-    st.image(uploaded_file, width=IMG_SIZE[0], caption="Imagen cargada")
+    st.image(uploaded_file, caption="Imagen cargada")
 
     # Preprocesamiento de la imagen para hacer la predicción
-    img = image.load_img(uploaded_file, target_size=IMG_SIZE)
+    img = image.load_img(uploaded_file, target_size=(155, 155))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
-    # Realizar la predicción
-    prediction = model.predict(img_array)
+    # Realizar la predicción con redirección de salida para evitar UnicodeEncodeError
+    with open(os.devnull, 'w') as devnull:
+        with contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull):
+            prediction = model.predict(img_array)
 
     # Mostrar resultados
-    if prediction[0][0] < 0.5:
-        st.success('El modelo predice que la imagen es de un **NORMAL**.')
+    if prediction[0][0] > 0.5:
+        st.success('El modelo predice que la imagen es de un **Perro**.')
     else:
-        st.error('El modelo predice que la imagen es de un **PNEUMONIA**.')
-
-    f"Confianza de la predicción: {prediction[0][0]:.4f}"
+        st.success('El modelo predice que la imagen es de un **Gato**.')
